@@ -286,6 +286,7 @@ class FastAPI(Starlette):
         ),
         name: Optional[str] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> None:
         self.router.add_api_route(
             path,
@@ -311,6 +312,7 @@ class FastAPI(Starlette):
             response_class=response_class,
             name=name,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def api_route(
@@ -338,6 +340,7 @@ class FastAPI(Starlette):
         response_class: Type[Response] = Default(JSONResponse),
         name: Optional[str] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         def decorator(func: DecoratedCallable) -> DecoratedCallable:
             self.router.add_api_route(
@@ -364,6 +367,7 @@ class FastAPI(Starlette):
                 response_class=response_class,
                 name=name,
                 openapi_extra=openapi_extra,
+                status_phrase=status_phrase,
             )
             return func
 
@@ -433,6 +437,7 @@ class FastAPI(Starlette):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.router.get(
             path,
@@ -457,6 +462,7 @@ class FastAPI(Starlette):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def put(
@@ -484,6 +490,7 @@ class FastAPI(Starlette):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.router.put(
             path,
@@ -508,6 +515,7 @@ class FastAPI(Starlette):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def post(
@@ -535,6 +543,7 @@ class FastAPI(Starlette):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.router.post(
             path,
@@ -559,6 +568,7 @@ class FastAPI(Starlette):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def delete(
@@ -586,6 +596,7 @@ class FastAPI(Starlette):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.router.delete(
             path,
@@ -610,6 +621,7 @@ class FastAPI(Starlette):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def options(

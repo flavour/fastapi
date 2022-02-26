@@ -175,6 +175,7 @@ def get_request_handler(
     response_model_exclude_defaults: bool = False,
     response_model_exclude_none: bool = False,
     dependency_overrides_provider: Optional[Any] = None,
+    status_phrase: Optional[str] = None,
 ) -> Callable[[Request], Coroutine[Any, Any, Response]]:
     assert dependant.call is not None, "dependant.call must be a function"
     is_coroutine = asyncio.iscoroutinefunction(dependant.call)
@@ -248,6 +249,8 @@ def get_request_handler(
             # response class, in the case of redirect it's 307
             if status_code is not None:
                 response_args["status_code"] = status_code
+            if status_phrase is not None:
+                response_args["status_phrase"] = status_phrase
             response = actual_response_class(response_data, **response_args)
             response.headers.raw.extend(sub_response.headers.raw)
             if sub_response.status_code:
@@ -335,6 +338,7 @@ class APIRoute(routing.Route):
         dependency_overrides_provider: Optional[Any] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> None:
         # normalise enums e.g. http.HTTPStatus
         if isinstance(status_code, IntEnum):
@@ -372,6 +376,7 @@ class APIRoute(routing.Route):
             self.response_field = None  # type: ignore
             self.secure_cloned_response_field = None
         self.status_code = status_code
+        self.status_phrase = status_phrase
         self.tags = tags or []
         if dependencies:
             self.dependencies = list(dependencies)
@@ -437,6 +442,7 @@ class APIRoute(routing.Route):
             response_model_exclude_defaults=self.response_model_exclude_defaults,
             response_model_exclude_none=self.response_model_exclude_none,
             dependency_overrides_provider=self.dependency_overrides_provider,
+            status_phrase=self.status_phrase,
         )
 
     def matches(self, scope: Scope) -> Tuple[Match, Scope]:
@@ -519,6 +525,7 @@ class APIRouter(routing.Router):
         route_class_override: Optional[Type[APIRoute]] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> None:
         route_class = route_class_override or self.route_class
         responses = responses or {}
@@ -561,6 +568,7 @@ class APIRouter(routing.Router):
             dependency_overrides_provider=self.dependency_overrides_provider,
             callbacks=current_callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
         self.routes.append(route)
 
@@ -590,6 +598,7 @@ class APIRouter(routing.Router):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         def decorator(func: DecoratedCallable) -> DecoratedCallable:
             self.add_api_route(
@@ -617,6 +626,7 @@ class APIRouter(routing.Router):
                 name=name,
                 callbacks=callbacks,
                 openapi_extra=openapi_extra,
+                status_phrase=status_phrase,
             )
             return func
 
@@ -722,6 +732,7 @@ class APIRouter(routing.Router):
                     route_class_override=type(route),
                     callbacks=current_callbacks,
                     openapi_extra=route.openapi_extra,
+                    status_phrase=route.status_phrase,
                 )
             elif isinstance(route, routing.Route):
                 methods = list(route.methods or [])  # type: ignore # in Starlette
@@ -770,6 +781,7 @@ class APIRouter(routing.Router):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.api_route(
             path=path,
@@ -795,6 +807,7 @@ class APIRouter(routing.Router):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def put(
@@ -822,6 +835,7 @@ class APIRouter(routing.Router):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.api_route(
             path=path,
@@ -847,6 +861,7 @@ class APIRouter(routing.Router):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def post(
@@ -874,6 +889,7 @@ class APIRouter(routing.Router):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.api_route(
             path=path,
@@ -899,6 +915,7 @@ class APIRouter(routing.Router):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def delete(
@@ -926,6 +943,7 @@ class APIRouter(routing.Router):
         name: Optional[str] = None,
         callbacks: Optional[List[BaseRoute]] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
+        status_phrase: Optional[str] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         return self.api_route(
             path=path,
@@ -951,6 +969,7 @@ class APIRouter(routing.Router):
             name=name,
             callbacks=callbacks,
             openapi_extra=openapi_extra,
+            status_phrase=status_phrase,
         )
 
     def options(
